@@ -56,7 +56,7 @@ def minimax(board, depth, maximizing):
         return max_eval, best_move
     else:
         min_eval = float('inf')
-        print(board.legal_moves)
+        #print(board.legal_moves)
         for move in board.legal_moves:
             board.push(move)
             eval2 = evaluate_board(board)
