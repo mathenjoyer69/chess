@@ -44,7 +44,7 @@ def minimax(board, depth, maximizing):
 
     best_move = None
     if maximizing:
-        max_eval = -10000
+        max_eval = float('-inf')
         for move in board.legal_moves:
             board.push(move)
             #eval2 = evaluate_board(board)
