@@ -166,8 +166,7 @@ while running and not autoplay_online_bool:
                     selected_square = square
             else:
                 if board.piece_at(selected_square) and board.piece_at(selected_square).piece_type == chess.PAWN:
-                    if chess.square_rank(square) == 7 or chess.square_rank(
-                            square) == 0:
+                    if chess.square_rank(square) == 7 or chess.square_rank(square) == 0:
                         move = chess.Move(selected_square, square, promotion=chess.QUEEN)
                     else:
                         move = chess.Move(selected_square, square)
