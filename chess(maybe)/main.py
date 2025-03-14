@@ -223,7 +223,13 @@ while running and autoplay_online_bool:
                 if board.piece_at(square):
                     selected_square = square
             else:
-                move = chess.Move(selected_square, square)
+                if board.piece_at(selected_square) and board.piece_at(selected_square).piece_type == chess.PAWN:
+                    if chess.square_rank(square) == 7 or chess.square_rank(square) == 0:
+                        move = chess.Move(selected_square, square, promotion=chess.QUEEN)
+                    else:
+                        move = chess.Move(selected_square, square)
+                else:
+                    move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
                     flipped = not flipped
