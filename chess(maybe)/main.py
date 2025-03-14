@@ -2,7 +2,40 @@ from time import sleep
 import pygame
 import chess
 import pyautogui
+import tkinter as tk
 
+def on_close():
+    global autoplay_online_bool, analysis, autoplay_bool
+    autoplay_online_bool = autoplay_online_bool.get()
+    analysis = analysis.get()
+    autoplay_bool = autoplay_bool.get()
+    root.destroy()
+
+root = tk.Tk()
+
+autoplay_online_bool = tk.BooleanVar(value=False)
+analysis = tk.BooleanVar(value=False)
+autoplay_bool = tk.BooleanVar(value=False)
+
+autoplay_online_label = tk.Label(root,text="click this if you want the bot to be able to move pieces on chess.com")
+autoplay_online_label.pack()
+check_autoplay_online = tk.Checkbutton(root, text="Autoplay Online", variable=autoplay_online_bool)
+check_autoplay_online.pack(pady=5)
+
+analysis_label = tk.Label(root,text="the analysis is for chess.com click it if you play on the analysis board. if you play online dont click it")
+analysis_label.pack()
+check_analysis = tk.Checkbutton(root, text="Analysis", variable=analysis)
+check_analysis.pack(pady=5)
+
+autoplay_label = tk.Label(root,text="the bot will play the move on the pygame chess screen that will open up as soon as you close this window")
+autoplay_label.pack()
+check_autoplay = tk.Checkbutton(root, text="Autoplay", variable=autoplay_bool)
+check_autoplay.pack(pady=5)
+
+root.protocol("WM_DELETE_WINDOW", on_close)
+root.mainloop()
+
+print(autoplay_online_bool,autoplay_bool,analysis)
 pygame.init()
 
 WIDTH, HEIGHT = 800, 800
@@ -136,13 +169,11 @@ def autoplay_online(move1,analysis):
     sleep(1)
     pyautogui.dragTo(last_m_coords,button="left")
 
-autoplay_online_bool = False
-analysis = True
-autoplay_bool = False
 running = True
 selected_square = None
 flipped = True
 counter = 0
+
 while running and not autoplay_online_bool:
     draw_board(flipped)
     draw_pieces(flipped)
