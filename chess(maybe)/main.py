@@ -19,22 +19,22 @@ analysis = tk.BooleanVar(value=False)
 autoplay_bool = tk.BooleanVar(value=False)
 custom_board_bool = tk.BooleanVar(value=False)
 
-autoplay_online_label = tk.Label(root, text="Enable bot to move pieces on chess.com")
+autoplay_online_label = tk.Label(root, text="enable bot to move pieces on chess.com")
 autoplay_online_label.pack()
 check_autoplay_online = tk.Checkbutton(root, text="Autoplay Online", variable=autoplay_online_bool)
 check_autoplay_online.pack(pady=5)
 
-analysis_label = tk.Label(root, text="Enable analysis mode for chess.com")
+analysis_label = tk.Label(root, text="makes the bot play in the analysis mode of chess.com")
 analysis_label.pack()
 check_analysis = tk.Checkbutton(root, text="Analysis", variable=analysis)
 check_analysis.pack(pady=5)
 
-autoplay_label = tk.Label(root, text="Bot will play moves automatically in the Pygame chess screen")
+autoplay_label = tk.Label(root, text="the bot will play on the pygame screen automatically")
 autoplay_label.pack()
 check_autoplay = tk.Checkbutton(root, text="Autoplay", variable=autoplay_bool)
 check_autoplay.pack(pady=5)
 
-custom_board_label = tk.Label(root, text="Enable custom board setup")
+custom_board_label = tk.Label(root, text="click this to create a custom board")
 custom_board_label.pack()
 check_custom_board = tk.Checkbutton(root, text="Custom Board", variable=custom_board_bool)
 check_custom_board.pack(pady=5)
@@ -176,7 +176,7 @@ selected_square = None
 flipped = True
 counter = 0
 moves_played = []
-temp_square = None
+
 while running and custom_board_bool:
     draw_board(flipped)
     draw_pieces(flipped)
@@ -187,32 +187,26 @@ while running and custom_board_bool:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             row, col = get_square_from_pos(pygame.mouse.get_pos(), flipped)
             selected_square = chess.square(col, row)
-            print(selected_square,temp_square)
         elif event.type == pygame.KEYDOWN:
             if selected_square is not None:
-                if temp_square == selected_square:
-                    print("unselected the square")
-                    selected_square = None
-                else:
-                    is_shift_pressed = pygame.key.get_mods() & pygame.KMOD_SHIFT
-                    piece_color = chess.BLACK if is_shift_pressed else chess.WHITE
-                    temp_square = selected_square
-                    if event.key == pygame.K_p:
-                        board.set_piece_at(selected_square, chess.Piece(chess.PAWN, piece_color))
-                    elif event.key == pygame.K_r:
-                        board.set_piece_at(selected_square, chess.Piece(chess.ROOK, piece_color))
-                    elif event.key == pygame.K_n:
-                        board.set_piece_at(selected_square, chess.Piece(chess.KNIGHT, piece_color))
-                    elif event.key == pygame.K_b:
-                        board.set_piece_at(selected_square, chess.Piece(chess.BISHOP, piece_color))
-                    elif event.key == pygame.K_q:
-                        board.set_piece_at(selected_square, chess.Piece(chess.QUEEN, piece_color))
-                    elif event.key == pygame.K_k:
-                        board.set_piece_at(selected_square, chess.Piece(chess.KING, piece_color))
-                    elif event.key == pygame.K_BACKSPACE:
-                        board.remove_piece_at(selected_square)
-                    elif event.key == pygame.K_SPACE:
-                        custom_board_bool = False
+                is_shift_pressed = pygame.key.get_mods() & pygame.KMOD_SHIFT
+                piece_color = chess.BLACK if is_shift_pressed else chess.WHITE
+                if event.key == pygame.K_p:
+                    board.set_piece_at(selected_square, chess.Piece(chess.PAWN, piece_color))
+                elif event.key == pygame.K_r:
+                    board.set_piece_at(selected_square, chess.Piece(chess.ROOK, piece_color))
+                elif event.key == pygame.K_n:
+                    board.set_piece_at(selected_square, chess.Piece(chess.KNIGHT, piece_color))
+                elif event.key == pygame.K_b:
+                    board.set_piece_at(selected_square, chess.Piece(chess.BISHOP, piece_color))
+                elif event.key == pygame.K_q:
+                    board.set_piece_at(selected_square, chess.Piece(chess.QUEEN, piece_color))
+                elif event.key == pygame.K_k:
+                    board.set_piece_at(selected_square, chess.Piece(chess.KING, piece_color))
+                elif event.key == pygame.K_BACKSPACE:
+                    board.remove_piece_at(selected_square)
+                elif event.key == pygame.K_SPACE:
+                    custom_board_bool = False
             else:
                 print("select a square first😡")
 while running and not autoplay_online_bool and not custom_board_bool:
