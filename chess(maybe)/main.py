@@ -223,10 +223,11 @@ while running and not autoplay_online_bool:
                 print("autoplay online on")
         if autoplay_bool:
             if counter % 2 != 0:
-                counter += 1
                 best_move = get_best_move()
                 print(best_move)
-                board.push(best_move)
+                if board.legal_moves:
+                    counter += 1
+                    board.push(best_move)
                 flipped = not flipped
 if running and autoplay_online_bool:
     flipped = True
