@@ -1,3 +1,4 @@
+from math import trunc
 from time import sleep
 import pygame
 import chess
@@ -162,12 +163,12 @@ def autoplay_online(move1,analysis):
 }
     first_mouse = move_str[:2]
     last_mouse = move_str[2:]
-    first_m_coords = coordinates[first_mouse]
-    last_m_coords = coordinates[last_mouse]
-    print(first_m_coords,last_m_coords)
-    pyautogui.moveTo(first_m_coords)
+    first_m_coordinates = coordinates[first_mouse]
+    last_m_coordinates = coordinates[last_mouse]
+    print(first_m_coordinates,last_m_coordinates)
+    pyautogui.moveTo(first_m_coordinates)
     sleep(1)
-    pyautogui.dragTo(last_m_coords,button="left")
+    pyautogui.dragTo(last_m_coordinates,button="left")
 
 running = True
 selected_square = None
@@ -175,6 +176,7 @@ flipped = True
 counter = 0
 
 while running and not autoplay_online_bool:
+    keys = pygame.key.get_pressed()
     draw_board(flipped)
     draw_pieces(flipped)
     pygame.display.flip()
@@ -205,6 +207,7 @@ while running and not autoplay_online_bool:
                     move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
+                    print(move)
                     flipped = not flipped
                     counter += 1
                 else:
@@ -220,10 +223,10 @@ while running and not autoplay_online_bool:
                     print("its white's turn")
             elif event.key == pygame.K_d:
                 autoplay_bool = not autoplay_bool
-                if autoplay_bool:
-                    print("autoplay on")
-                else:
-                    print("autoplay off")
+                print("autoplay on")
+            elif event.key == pygame.K_a:
+                autoplay_online_bool = not autoplay_online_bool
+                print("autoplay online on")
         if autoplay_bool:
             if counter % 2 != 0:
                 counter += 1
@@ -231,7 +234,8 @@ while running and not autoplay_online_bool:
                 print(best_move)
                 board.push(best_move)
                 flipped = not flipped
-
+if running and autoplay_online_bool:
+    flipped = True
 while running and autoplay_online_bool:
     draw_board(flipped)
     draw_pieces(flipped)
@@ -263,7 +267,7 @@ while running and autoplay_online_bool:
                     move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
-                    flipped = not flipped
+                    autoplay_online(move,analysis)
                     counter += 1
                 else:
                     print("illegal move")
@@ -277,7 +281,6 @@ while running and autoplay_online_bool:
                     board.push(best_move)
                     sleep(1)
                     autoplay_online(best_move,analysis)
-                    flipped = not flipped
                     counter += 1
                 else:
                     print("its white's turn")
@@ -288,7 +291,6 @@ while running and autoplay_online_bool:
                 print(best_move)
                 sleep(1)
                 board.push(best_move)
-                flipped = not flipped
                 sleep(1)
                 autoplay_online(best_move,analysis)
 
