@@ -321,7 +321,7 @@ while running and autoplay_online_bool and not custom_board_bool:
                     print("illegal move")
                 selected_square = None
             print(f"you clicked {board.piece_at(square)}")
-        elif event.type == pygame.KEYDOWN and not autoplay_bool:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
                     best_move = get_best_move()
@@ -332,6 +332,11 @@ while running and autoplay_online_bool and not custom_board_bool:
                     counter += 1
                 else:
                     print("its white's turn")
+                    best_move = get_best_move()
+                    board.push(best_move)
+                    sleep(1)
+                    autoplay_online(best_move, analysis)
+
         if autoplay_bool:
             if counter % 2 != 0:
                 counter += 1
