@@ -1,4 +1,3 @@
-from math import trunc
 from time import sleep
 import pygame
 import chess
@@ -62,7 +61,6 @@ pygame.display.set_caption("chess")
 def evaluate_board(board):
     piece_values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9, chess.KING: 0}
     value = 0
-    max = 0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece:
@@ -91,12 +89,8 @@ def minimax(board, depth, maximizing):
         return max_eval, best_move
     else:
         min_eval = float('inf')
-        #print(board.legal_moves)
         for move in board.legal_moves:
             board.push(move)
-            eval2 = evaluate_board(board)
-            #if eval2 > 0:
-                #print(eval2,move)
             eval, _ = minimax(board, depth - 1, True)
             board.pop()
             if eval < min_eval:
