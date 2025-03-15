@@ -5,10 +5,11 @@ import pyautogui
 import tkinter as tk
 
 def on_close():
-    global autoplay_online_bool, analysis, autoplay_bool
+    global autoplay_online_bool, analysis, autoplay_bool, custom_board_bool
     autoplay_online_bool = autoplay_online_bool.get()
     analysis = analysis.get()
     autoplay_bool = autoplay_bool.get()
+    custom_board_bool = custom_board_bool.get()
     root.destroy()
 
 root = tk.Tk()
@@ -16,26 +17,32 @@ root = tk.Tk()
 autoplay_online_bool = tk.BooleanVar(value=False)
 analysis = tk.BooleanVar(value=False)
 autoplay_bool = tk.BooleanVar(value=False)
+custom_board_bool = tk.BooleanVar(value=False)
 
-autoplay_online_label = tk.Label(root,text="click this if you want the bot to be able to move pieces on chess.com")
+autoplay_online_label = tk.Label(root, text="Enable bot to move pieces on chess.com")
 autoplay_online_label.pack()
 check_autoplay_online = tk.Checkbutton(root, text="Autoplay Online", variable=autoplay_online_bool)
 check_autoplay_online.pack(pady=5)
 
-analysis_label = tk.Label(root,text="the analysis is for chess.com click it if you play on the analysis board. if you play online dont click it")
+analysis_label = tk.Label(root, text="Enable analysis mode for chess.com")
 analysis_label.pack()
 check_analysis = tk.Checkbutton(root, text="Analysis", variable=analysis)
 check_analysis.pack(pady=5)
 
-autoplay_label = tk.Label(root,text="the bot will play the move on the pygame chess screen that will open up as soon as you close this window")
+autoplay_label = tk.Label(root, text="Bot will play moves automatically in the Pygame chess screen")
 autoplay_label.pack()
 check_autoplay = tk.Checkbutton(root, text="Autoplay", variable=autoplay_bool)
 check_autoplay.pack(pady=5)
 
+custom_board_label = tk.Label(root, text="Enable custom board setup")
+custom_board_label.pack()
+check_custom_board = tk.Checkbutton(root, text="Custom Board", variable=custom_board_bool)
+check_custom_board.pack(pady=5)
+
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
 
-print(autoplay_online_bool,autoplay_bool,analysis)
+print(autoplay_online_bool,autoplay_bool,analysis,custom_board_bool)
 pygame.init()
 
 WIDTH, HEIGHT = 800, 800
@@ -53,7 +60,7 @@ for piece, filename in PIECES.items():
     PIECE_IMAGES[piece] = pygame.image.load(f'assets/{filename}')
     PIECE_IMAGES[piece] = pygame.transform.scale(PIECE_IMAGES[piece], (SQUARE_SIZE, SQUARE_SIZE))
 
-board = chess.Board()
+board = chess.Board() if not custom_board_bool else chess.Board(None)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("chess")
 
@@ -154,7 +161,7 @@ def autoplay_online(move1,analysis):
                        "f1":(775,905),"f2":(775,805),"f3":(775,705),"f4":(775,605),"f5":(775,505),"f6":(775,405),"f7":(775,305),"f8":(775,205),
                        "g1":(875,905),"g2":(875,805),"g3":(875,705),"g4":(875,605),"g5":(875,505),"g6":(875,405),"g7":(875,305),"g8":(875,205),
                        "h1":(975,905),"h2":(975,805),"h3":(975,705),"h4":(975,605),"h5":(975,505),"h6":(975,405),"h7":(975,305),"h8":(975,205),
-}
+                      }
     first_mouse = move_str[:2]
     last_mouse = move_str[2:]
     first_m_coordinates = coordinates[first_mouse]
@@ -168,8 +175,42 @@ running = True
 selected_square = None
 flipped = True
 counter = 0
+moves_played = []
 
-while running and not autoplay_online_bool:
+while running and custom_board_bool:
+    draw_board(flipped)
+    draw_pieces(flipped)
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            row, col = get_square_from_pos(pygame.mouse.get_pos(), flipped)
+            selected_square = chess.square(col, row)
+        elif event.type == pygame.KEYDOWN:
+            if selected_square is not None:
+                is_shift_pressed = pygame.key.get_mods() & pygame.KMOD_SHIFT
+                piece_color = chess.BLACK if is_shift_pressed else chess.WHITE
+
+                if event.key == pygame.K_p:
+                    board.set_piece_at(selected_square, chess.Piece(chess.PAWN, piece_color))
+                elif event.key == pygame.K_r:
+                    board.set_piece_at(selected_square, chess.Piece(chess.ROOK, piece_color))
+                elif event.key == pygame.K_n:
+                    board.set_piece_at(selected_square, chess.Piece(chess.KNIGHT, piece_color))
+                elif event.key == pygame.K_b:
+                    board.set_piece_at(selected_square, chess.Piece(chess.BISHOP, piece_color))
+                elif event.key == pygame.K_q:
+                    board.set_piece_at(selected_square, chess.Piece(chess.QUEEN, piece_color))
+                elif event.key == pygame.K_k:
+                    board.set_piece_at(selected_square, chess.Piece(chess.KING, piece_color))
+                elif event.key == pygame.K_BACKSPACE:
+                    board.remove_piece_at(selected_square)
+                elif event.key == pygame.K_SPACE:
+                    custom_board_bool = False
+
+while running and not autoplay_online_bool and not custom_board_bool:
     keys = pygame.key.get_pressed()
     draw_board(flipped)
     draw_pieces(flipped)
@@ -201,6 +242,7 @@ while running and not autoplay_online_bool:
                     move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
+                    moves_played.append(move)
                     print(move)
                     flipped = not flipped
                     counter += 1
@@ -220,6 +262,7 @@ while running and not autoplay_online_bool:
                 print("autoplay on")
             elif event.key == pygame.K_a:
                 autoplay_online_bool = not autoplay_online_bool
+                autoplay_bool = True
                 print("autoplay online on")
         if autoplay_bool:
             if counter % 2 != 0:
@@ -228,10 +271,15 @@ while running and not autoplay_online_bool:
                 if board.legal_moves:
                     counter += 1
                     board.push(best_move)
+                    moves_played.append(best_move)
                 flipped = not flipped
 if running and autoplay_online_bool:
     flipped = True
-while running and autoplay_online_bool:
+while running and autoplay_online_bool and not custom_board_bool:
+    if moves_played:
+        for i in moves_played:
+            autoplay_online(i,analysis)
+            sleep(1)
     draw_board(flipped)
     draw_pieces(flipped)
     pygame.display.flip()
