@@ -217,6 +217,9 @@ while running and not autoplay_online_bool and not custom_board_bool:
 
     if not board.legal_moves:
         running = False
+        if not board.is_check():
+            print("draw")
+            break
         if counter % 2 == 0:
             print("black won")
         else:
@@ -285,6 +288,9 @@ while running and autoplay_online_bool and not custom_board_bool:
 
     if not board.legal_moves:
         running = False
+        if not board.is_check():
+            print("draw")
+            break
         if counter % 2 == 0:
             print("black won")
         else:
