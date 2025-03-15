@@ -176,40 +176,45 @@ selected_square = None
 flipped = True
 counter = 0
 moves_played = []
-
+temp_square = None
 while running and custom_board_bool:
     draw_board(flipped)
     draw_pieces(flipped)
     pygame.display.flip()
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             row, col = get_square_from_pos(pygame.mouse.get_pos(), flipped)
             selected_square = chess.square(col, row)
+            print(selected_square,temp_square)
         elif event.type == pygame.KEYDOWN:
             if selected_square is not None:
-                is_shift_pressed = pygame.key.get_mods() & pygame.KMOD_SHIFT
-                piece_color = chess.BLACK if is_shift_pressed else chess.WHITE
-
-                if event.key == pygame.K_p:
-                    board.set_piece_at(selected_square, chess.Piece(chess.PAWN, piece_color))
-                elif event.key == pygame.K_r:
-                    board.set_piece_at(selected_square, chess.Piece(chess.ROOK, piece_color))
-                elif event.key == pygame.K_n:
-                    board.set_piece_at(selected_square, chess.Piece(chess.KNIGHT, piece_color))
-                elif event.key == pygame.K_b:
-                    board.set_piece_at(selected_square, chess.Piece(chess.BISHOP, piece_color))
-                elif event.key == pygame.K_q:
-                    board.set_piece_at(selected_square, chess.Piece(chess.QUEEN, piece_color))
-                elif event.key == pygame.K_k:
-                    board.set_piece_at(selected_square, chess.Piece(chess.KING, piece_color))
-                elif event.key == pygame.K_BACKSPACE:
-                    board.remove_piece_at(selected_square)
-                elif event.key == pygame.K_SPACE:
-                    custom_board_bool = False
-
+                if temp_square == selected_square:
+                    print("unselected the square")
+                    selected_square = None
+                else:
+                    is_shift_pressed = pygame.key.get_mods() & pygame.KMOD_SHIFT
+                    piece_color = chess.BLACK if is_shift_pressed else chess.WHITE
+                    temp_square = selected_square
+                    if event.key == pygame.K_p:
+                        board.set_piece_at(selected_square, chess.Piece(chess.PAWN, piece_color))
+                    elif event.key == pygame.K_r:
+                        board.set_piece_at(selected_square, chess.Piece(chess.ROOK, piece_color))
+                    elif event.key == pygame.K_n:
+                        board.set_piece_at(selected_square, chess.Piece(chess.KNIGHT, piece_color))
+                    elif event.key == pygame.K_b:
+                        board.set_piece_at(selected_square, chess.Piece(chess.BISHOP, piece_color))
+                    elif event.key == pygame.K_q:
+                        board.set_piece_at(selected_square, chess.Piece(chess.QUEEN, piece_color))
+                    elif event.key == pygame.K_k:
+                        board.set_piece_at(selected_square, chess.Piece(chess.KING, piece_color))
+                    elif event.key == pygame.K_BACKSPACE:
+                        board.remove_piece_at(selected_square)
+                    elif event.key == pygame.K_SPACE:
+                        custom_board_bool = False
+            else:
+                print("select a square first😡")
 while running and not autoplay_online_bool and not custom_board_bool:
     keys = pygame.key.get_pressed()
     draw_board(flipped)
