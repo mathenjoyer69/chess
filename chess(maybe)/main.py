@@ -3,13 +3,15 @@ import pygame
 import chess
 import pyautogui
 import tkinter as tk
+import random
 
 def on_close():
-    global autoplay_online_bool, analysis, autoplay_bool, custom_board_bool
+    global autoplay_online_bool, analysis, autoplay_bool, custom_board_bool,bot_vs_bot
     autoplay_online_bool = autoplay_online_bool.get()
     analysis = analysis.get()
     autoplay_bool = autoplay_bool.get()
     custom_board_bool = custom_board_bool.get()
+    bot_vs_bot = bot_vs_bot.get()
     root.destroy()
 
 root = tk.Tk()
@@ -18,6 +20,7 @@ autoplay_online_bool = tk.BooleanVar(value=False)
 analysis = tk.BooleanVar(value=False)
 autoplay_bool = tk.BooleanVar(value=False)
 custom_board_bool = tk.BooleanVar(value=False)
+bot_vs_bot = tk.BooleanVar(value=False)
 
 autoplay_online_label = tk.Label(root, text="enable bot to move pieces on chess.com")
 autoplay_online_label.pack()
@@ -36,13 +39,18 @@ check_autoplay.pack(pady=5)
 
 custom_board_label = tk.Label(root, text="click this to create a custom board")
 custom_board_label.pack()
-check_custom_board = tk.Checkbutton(root, text="Custom Board", variable=custom_board_bool)
+check_custom_board = tk.Checkbutton(root, text="custom Board", variable=custom_board_bool)
 check_custom_board.pack(pady=5)
+
+bot_vs_bot_label = tk.Label(root,text="click this if you want the bot to play againts it self(it doesnt work yet)")
+bot_vs_bot_label.pack()
+check_bot_vs_bot = tk.Checkbutton(root,text="bot vs bot",variable=bot_vs_bot)
+check_bot_vs_bot.pack(pady=5)
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
 
-print(autoplay_online_bool,autoplay_bool,analysis,custom_board_bool)
+print(autoplay_online_bool,autoplay_bool,analysis,custom_board_bool,bot_vs_bot)
 pygame.init()
 
 WIDTH, HEIGHT = 800, 800
@@ -108,8 +116,13 @@ def minimax(board, depth, maximizing):
 
 def get_best_move():
     _, best_move = minimax(board, 3, board.turn)
-    return best_move
-
+    if best_move != None:
+        return best_move
+    else:
+        legal_moves = list(board.legal_moves)
+        n = random.randint(1,len(legal_moves))
+        print("random move",legal_moves[n])
+        return legal_moves[n]
 
 def draw_board(flipped):
     for row in range(ROWS):
@@ -174,6 +187,7 @@ def autoplay_online(move1,analysis):
 running = True
 selected_square = None
 flipped = True
+
 counter = 0
 moves_played = []
 
@@ -209,7 +223,7 @@ while running and custom_board_bool:
                     custom_board_bool = False
             else:
                 print("select a square first😡")
-while running and not autoplay_online_bool and not custom_board_bool:
+while running and not autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     keys = pygame.key.get_pressed()
     draw_board(flipped)
     draw_pieces(flipped)
@@ -231,6 +245,7 @@ while running and not autoplay_online_bool and not custom_board_bool:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             row, col = get_square_from_pos(pygame.mouse.get_pos(), flipped)
             square = chess.square(col, row)
+            print(square)
             if selected_square is None:
                 if board.piece_at(square):
                     selected_square = square
@@ -277,7 +292,7 @@ while running and not autoplay_online_bool and not custom_board_bool:
                 flipped = not flipped
 if running and autoplay_online_bool:
     flipped = True
-while running and autoplay_online_bool and not custom_board_bool:
+while running and autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     if moves_played:
         for i in moves_played:
             autoplay_online(i,analysis)
@@ -346,5 +361,41 @@ while running and autoplay_online_bool and not custom_board_bool:
                 board.push(best_move)
                 sleep(1)
                 autoplay_online(best_move,analysis)
+play = True
+square_to_number = {"a1":0,"a2":8,"a3":16,"a4":24,"a5":32,"a6":40,"a7":48,"a8":56,
+                    "b1":1,"b2":9,"b3":17,"b4":25,"b5":33,"b6":41,"b7":49,"b8":57,
+                    "c1":2,"c2":10,"c3":18,"c4":26,"c5":34,"c6":42,"c7":50,"c8":58,
+                    "d1":3,"d2":11,"d3":19,"d4":27,"d5":35,"d6":43,"d7":51,"d8":59,
+                    "e1":4,"e2":12,"e3":20,"e4":28,"e5":36,"e6":44,"e7":52,"e8":60,
+                    "f1":5,"f2":13,"f3":21,"f4":29,"f5":37,"f6":45,"f7":53,"f8":61,
+                    "g1":6,"g2":14,"g3":22,"g4":30,"g5":38,"g6":46,"g7":54,"g8":62,
+                    "h1":7,"h2":15,"h3":23,"h4":31,"h5":39,"h6":47,"h7":55,"h8":63}
+moves = []
+while running and bot_vs_bot:
+    k_in_a_row = 0
+    draw_board(flipped)
+    draw_pieces(flipped)
+    pygame.display.flip()
 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                play = not play
+    if play:
+        best_move = get_best_move()
+        moves.append(best_move)
+        #move_str = str(best_move)
+        #move_1,move_2 = move_str[:2],move_str[2:]
+        #move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
+        #moves.append(move_1_n)
+        #moves.append(move_2_n)
+        print(best_move)
+        board.push(best_move)
+        sleep(0.2)
+        moves_played.append(best_move)
+        if autoplay_online_bool:
+            autoplay_online(best_move,analysis)
+print(moves)
 pygame.quit()
