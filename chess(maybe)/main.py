@@ -74,20 +74,106 @@ pygame.display.set_caption("chess")
 
 
 def evaluate_board(board):
-    piece_values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9, chess.KING: 0}
+    piece_values = {
+        chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330,
+        chess.ROOK: 500, chess.QUEEN: 900, chess.KING: 20000
+    }
+
+    pawn_table = [
+        0, 5, 10, 15, 15, 10, 5, 0,
+        0, 10, 20, 25, 25, 20, 10, 0,
+        0, 5, 10, 20, 20, 10, 5, 0,
+        5, 5, 10, 15, 15, 10, 5, 5,
+        5, 0, 5, 10, 10, 5, 0, 5,
+        0, 0, 0, -5, -5, 0, 0, 0,
+        0, 0, 0, 5, 5, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+    ]
+
+    knight_table = [
+        -50, -40, -30, -30, -30, -30, -40, -50,
+        -40, -20, 0, 5, 5, 0, -20, -40,
+        -30, 5, 10, 15, 15, 10, 5, -30,
+        -30, 0, 15, 20, 20, 15, 0, -30,
+        -30, 5, 15, 20, 20, 15, 5, -30,
+        -30, 0, 10, 15, 15, 10, 0, -30,
+        -40, -20, 5, 5, 5, 5, -20, -40,
+        -50, -40, -30, -30, -30, -30, -40, -50,
+    ]
+
+    bishop_table = [
+        -20, -10, -10, -10, -10, -10, -10, -20,
+        -10, 5, 0, 0, 0, 0, 5, -10,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -10, 0, 5, 10, 10, 5, 0, -10,
+        -10, 0, 5, 10, 10, 5, 0, -10,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -10, 5, 0, 0, 0, 0, 5, -10,
+        -20, -10, -10, -10, -10, -10, -10, -20,
+    ]
+
+    rook_table = [
+        0, 5, 10, 10, 10, 10, 5, 0,
+        5, 5, 10, 10, 10, 10, 5, 5,
+        10, 10, 20, 20, 20, 20, 10, 10,
+        10, 10, 20, 20, 20, 20, 10, 10,
+        10, 10, 20, 20, 20, 20, 10, 10,
+        5, 5, 10, 10, 10, 10, 5, 5,
+        0, 5, 10, 10, 10, 10, 5, 0,
+        0, 0, 5, 5, 5, 5, 0, 0,
+    ]
+
+    queen_table = [
+        -20, -10, -5, 0, 0, -5, -10, -20,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -5, 5, 10, 10, 10, 10, 5, -5,
+        0, 5, 10, 15, 15, 10, 5, 0,
+        0, 5, 10, 15, 15, 10, 5, 0,
+        -5, 5, 10, 10, 10, 10, 5, -5,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -20, -10, -5, 0, 0, -5, -10, -20,
+    ]
+
+    king_table = [
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -20, -30, -30, -40, -40, -30, -30, -20,
+        -10, -20, -20, -30, -30, -20, -20, -10,
+        0, -10, -10, -20, -20, -10, -10, 0,
+        20, 20, 10, 0, 0, 10, 20, 20,
+    ]
+
     value = 0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece:
-            if piece.color == chess.WHITE:
-                value += piece_values[piece.piece_type]
-            else:
-                value -= piece_values[piece.piece_type]
+            sign = 1 if piece.color == chess.WHITE else -1
+            value += sign * piece_values[piece.piece_type]
+
+            if piece.piece_type == chess.PAWN:
+                value += sign * pawn_table[square]
+            elif piece.piece_type == chess.KNIGHT:
+                value += sign * knight_table[square]
+            elif piece.piece_type == chess.BISHOP:
+                value += sign * bishop_table[square]
+            elif piece.piece_type == chess.ROOK:
+                value += sign * rook_table[square]
+            elif piece.piece_type == chess.QUEEN:
+                value += sign * queen_table[square]
+            elif piece.piece_type == chess.KING:
+                value += sign * king_table[square]
+
+    value += 10 * (len(list(board.legal_moves)) if board.turn == chess.WHITE else -len(list(board.legal_moves)))
+
+    if board.is_checkmate():
+        return float('-inf') if board.turn == chess.WHITE else float('inf')
 
     return value
 
 
-def minimax(board, depth, maximizing):
+def minimax(board, depth, alpha, beta, maximizing):
     if depth == 0 or board.is_game_over():
         return evaluate_board(board), None
 
@@ -96,51 +182,40 @@ def minimax(board, depth, maximizing):
         max_eval = float('-inf')
         for move in board.legal_moves:
             board.push(move)
-            eval, _ = minimax(board, depth - 1, False)
-            if board.is_checkmate():
-                board.pop()
-                return eval,move
+            eval, _ = minimax(board, depth - 1, alpha, beta, False)
             board.pop()
             if eval > max_eval:
                 max_eval = eval
                 best_move = move
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
         return max_eval, best_move
     else:
         min_eval = float('inf')
         for move in board.legal_moves:
             board.push(move)
-            eval, _ = minimax(board, depth - 1, True)
-            if board.is_checkmate():
-                board.pop()
-                return eval,move
+            eval, _ = minimax(board, depth - 1, alpha, beta, True)
             board.pop()
             if eval < min_eval:
                 min_eval = eval
                 best_move = move
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
         return min_eval, best_move
 
-def minimax2(board,depth,maximizing):#hopefully i can make it better than the first one
-    print("not built yet")
-
-def get_best_move(bool):#the bool is only way i found to fix a bug
-    if not bool:
-        _, best_move = minimax(board, 3, board.turn)
-        if best_move != None:
-            return best_move
-        else:
-            legal_moves = list(board.legal_moves)
-            n = random.randint(1,len(legal_moves))
-            print("random move",legal_moves[n])
-            return legal_moves[n]
+def get_best_move():
+    _, best_move = minimax(board, 4, float('-inf'), float('inf'), board.turn)
+    print(board.legal_moves)
+    if best_move:
+        return best_move
     else:
-        _, best_move = minimax(board, 4, board.turn)
-        if best_move != None:
-            return best_move
+        if board.legal_moves:
+            return random.choice(list(board.legal_moves))
         else:
-            legal_moves = list(board.legal_moves)
-            n = random.randint(1, len(legal_moves))
-            print("random move", legal_moves[n])
-            return legal_moves[n]
+            print("no legal moves")
+    #return best_move if best_move else random.choice(list(board.legal_moves))
 
 def draw_board(flipped):
     for row in range(ROWS):
@@ -254,8 +329,10 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
             break
         if counter % 2 == 0:
             print("black won")
+            break
         else:
             print("white won")
+            break
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -288,7 +365,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
         elif event.type == pygame.KEYDOWN and not autoplay_bool:
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
-                    best_move = get_best_move(False)
+                    best_move = get_best_move()
                     print(f"ai chose: {best_move}")
                 else:
                     print("its white's turn")
@@ -301,7 +378,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                 print("autoplay online on")
         if autoplay_bool:
             if counter % 2 != 0:
-                best_move = get_best_move(False)
+                best_move = get_best_move()
                 print(best_move)
                 if board.legal_moves:
                     counter += 1
@@ -357,7 +434,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
-                    best_move = get_best_move(False)
+                    best_move = get_best_move()
                     print(f"ai chose: {best_move}")
                     board.push(best_move)
                     sleep(1)
@@ -365,7 +442,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
                     counter += 1
                 else:
                     print("its white's turn")
-                    best_move = get_best_move(False)
+                    best_move = get_best_move()
                     board.push(best_move)
                     sleep(1)
                     autoplay_online(best_move, analysis)
@@ -373,7 +450,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
         if autoplay_bool:
             if counter % 2 != 0:
                 counter += 1
-                best_move = get_best_move(False)
+                best_move = get_best_move()
                 print(best_move)
                 sleep(1)
                 board.push(best_move)
@@ -412,16 +489,7 @@ while running and bot_vs_bot:
             if event.key == pygame.K_SPACE:
                 play = not play
     if play:
-        last_6 = []
-        counter += 1
-        best_move = get_best_move(False)
-        if len(moves)>10:
-            for i in range(6):
-                last_6.append(moves[-i][2])
-            for i in last_6:
-                if len(last_6)-len(set(last_6)) < 3:
-                    print("moves repeated")
-                    best_move = get_best_move(True)
+        best_move = get_best_move()
         move_str = str(best_move)
         move_1,move_2 = move_str[:2],move_str[2:]
         move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
