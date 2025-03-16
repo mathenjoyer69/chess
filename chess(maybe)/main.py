@@ -97,6 +97,9 @@ def minimax(board, depth, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, False)
+            if board.is_checkmate():
+                board.pop()
+                return eval,move
             board.pop()
             if eval > max_eval:
                 max_eval = eval
@@ -107,6 +110,9 @@ def minimax(board, depth, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, True)
+            if board.is_checkmate():
+                board.pop()
+                return eval,move
             board.pop()
             if eval < min_eval:
                 min_eval = eval
