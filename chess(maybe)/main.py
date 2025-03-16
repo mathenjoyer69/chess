@@ -141,7 +141,7 @@ def get_best_move(bool):#the bool is only way i found to fix a bug
             n = random.randint(1, len(legal_moves))
             print("random move", legal_moves[n])
             return legal_moves[n]
-        
+
 def draw_board(flipped):
     for row in range(ROWS):
         for col in range(COLS):
@@ -414,15 +414,14 @@ while running and bot_vs_bot:
     if play:
         last_6 = []
         counter += 1
-        n = len(moves)
         best_move = get_best_move(False)
-        if moves:
-            for i in range(n,n-6,-1):
-                last_6.append(moves[i][2])
+        if len(moves)>10:
+            for i in range(6):
+                last_6.append(moves[-i][2])
             for i in last_6:
                 if len(last_6)-len(set(last_6)) < 3:
                     print("moves repeated")
-                    best_move = best_move(True) 
+                    best_move = get_best_move(True)
         move_str = str(best_move)
         move_1,move_2 = move_str[:2],move_str[2:]
         move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
