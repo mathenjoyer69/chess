@@ -74,64 +74,61 @@ pygame.display.set_caption("chess")
 
 
 def evaluate_board(board):
-    piece_values = {
-        chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330,
-        chess.ROOK: 500, chess.QUEEN: 900, chess.KING: 20000
-    }
+    piece_values = {chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330,chess.ROOK: 500, chess.QUEEN: 900, chess.KING: 10000}
 
     pawn_table = [
-        0, 5, 10, 15, 15, 10, 5, 0,
-        0, 10, 20, 25, 25, 20, 10, 0,
-        0, 5, 10, 20, 20, 10, 5, 0,
-        5, 5, 10, 15, 15, 10, 5, 5,
-        5, 0, 5, 10, 10, 5, 0, 5,
-        0, 0, 0, -5, -5, 0, 0, 0,
-        0, 0, 0, 5, 5, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0,  5,  10, 15,  15, 10, 5,  0,
+        0,  10, 20, 25,  25, 20, 10, 0,
+        0,  5,  10, 20,  20, 10, 5,  0,
+        5,  5,  10, 15,  15, 10, 5,  5,
+        5,  0,  5,  10,  10, 5,  0,  5,
+        0,  0,  0,  -5,  -5, 0,  0,  0,
+        0,  0,  0,  5,   5,  0,  0,  0,
+        0,  0,  0,  0,   0,  0,  0,  0,
     ]
 
     knight_table = [
-        -50, -40, -30, -30, -30, -30, -40, -50,
-        -40, -20, 0, 5, 5, 0, -20, -40,
-        -30, 5, 10, 15, 15, 10, 5, -30,
-        -30, 0, 15, 20, 20, 15, 0, -30,
-        -30, 5, 15, 20, 20, 15, 5, -30,
-        -30, 0, 10, 15, 15, 10, 0, -30,
-        -40, -20, 5, 5, 5, 5, -20, -40,
-        -50, -40, -30, -30, -30, -30, -40, -50,
+        -50, -40, -30, -30, -30, -30,-40, -50,
+        -40, -20, -5,  -5,  -5,  -5, -20, -40,
+        -30,  5,  10,  15,  15,  10,  5,  -30,
+        -30,  0,  15,  20,  20,  15,  0,  -30,
+        -30,  5,  15,  20,  20,  15,  5,  -30,
+        -30,  0,  10,  15,  15,  10,  0,  -30,
+        -40, -20,  5,   5,   5,   5, -20, -40,
+        -50, -40, -30, -30, -30, -30,-40, -50,
     ]
 
     bishop_table = [
         -20, -10, -10, -10, -10, -10, -10, -20,
-        -10, 5, 0, 0, 0, 0, 5, -10,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -10, 0, 5, 10, 10, 5, 0, -10,
-        -10, 0, 5, 10, 10, 5, 0, -10,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -10, 5, 0, 0, 0, 0, 5, -10,
+        -10,  5,   0,   0,   0,   0,   5,  -10,
+        -10,  0,   5,   5,   5,   5,   0,  -10,
+        -10,  0,   5,  10,  10,   5,   0,  -10,
+        -10,  0,   5,  10,  10,   5,   0,  -10,
+        -10,  0,   5,   5,   5,   5,   0,  -10,
+        -10,  7,   0,   0,   0,   0,   7,  -10,
         -20, -10, -10, -10, -10, -10, -10, -20,
     ]
 
     rook_table = [
-        0, 5, 10, 10, 10, 10, 5, 0,
-        5, 5, 10, 10, 10, 10, 5, 5,
+        0,  5,  10, 10, 10, 10,  5,  0,
+        5,  5,  10, 10, 10, 10,  5,  5,
         10, 10, 20, 20, 20, 20, 10, 10,
         10, 10, 20, 20, 20, 20, 10, 10,
         10, 10, 20, 20, 20, 20, 10, 10,
-        5, 5, 10, 10, 10, 10, 5, 5,
-        0, 5, 10, 10, 10, 10, 5, 0,
-        0, 0, 5, 5, 5, 5, 0, 0,
+        5,  5,  10, 10, 10, 10,  5,  5,
+        0,  5,  10, 10, 10, 10,  5,  0,
+        0,  0,  5,  5,  5,  5,   0,  0,
     ]
 
     queen_table = [
-        -20, -10, -5, 0, 0, -5, -10, -20,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -5, 5, 10, 10, 10, 10, 5, -5,
-        0, 5, 10, 15, 15, 10, 5, 0,
-        0, 5, 10, 15, 15, 10, 5, 0,
-        -5, 5, 10, 10, 10, 10, 5, -5,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -20, -10, -5, 0, 0, -5, -10, -20,
+        -20, -10, -5,   0,  0, -5, -10, -20,
+        -10,  0,   5,   5,  5,  5,  0,  -10,
+        -5,   5,  10,  10, 10, 10,  5,  -5,
+         0,   5,  10,  15, 15, 10,  5,   0,
+         0,   5,  10,  15, 15, 10,  5,   0,
+        -5,   5,  10,  10, 10, 10,  5,  -5,
+        -10,  0,   5,   5,  5,  5,  0,  -10,
+        -20, -10, -5,   0,  0, -5, -10, -20,
     ]
 
     king_table = [
@@ -141,15 +138,18 @@ def evaluate_board(board):
         -30, -40, -40, -50, -50, -40, -40, -30,
         -20, -30, -30, -40, -40, -30, -30, -20,
         -10, -20, -20, -30, -30, -20, -20, -10,
-        0, -10, -10, -20, -20, -10, -10, 0,
-        20, 20, 10, 0, 0, 10, 20, 20,
+         0,  -10, -10, -20, -20, -10, -10,  0,
+         20,  20,  10,  0,   0,   10,  20,  20,
     ]
 
     value = 0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece:
-            sign = 1 if piece.color == chess.WHITE else -1
+            if piece.color == chess.WHITE:
+                sign = 1
+            else:
+                sign = -1
             value += sign * piece_values[piece.piece_type]
 
             if piece.piece_type == chess.PAWN:
@@ -206,8 +206,7 @@ def minimax(board, depth, alpha, beta, maximizing):
         return min_eval, best_move
 
 def get_best_move():
-    _, best_move = minimax(board, 4, float('-inf'), float('inf'), board.turn)
-    print(board.legal_moves)
+    _, best_move = minimax(board, 3, float('-inf'), float('inf'), board.turn)
     if best_move:
         return best_move
     else:
@@ -215,7 +214,6 @@ def get_best_move():
             return random.choice(list(board.legal_moves))
         else:
             print("no legal moves")
-    #return best_move if best_move else random.choice(list(board.legal_moves))
 
 def draw_board(flipped):
     for row in range(ROWS):
@@ -274,7 +272,7 @@ def autoplay_online(move1,analysis):
     last_m_coordinates = coordinates[last_mouse]
     print(first_m_coordinates,last_m_coordinates)
     pyautogui.moveTo(first_m_coordinates)
-    sleep(1)
+    sleep(0.5)
     pyautogui.dragTo(last_m_coordinates,button="left")
 
 running = True
