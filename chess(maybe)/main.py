@@ -165,8 +165,6 @@ def evaluate_board(board):
             elif piece.piece_type == chess.KING:
                 value += sign * king_table[square]
 
-    value += 10 * (len(list(board.legal_moves)) if board.turn == chess.WHITE else -len(list(board.legal_moves)))
-
     if board.is_checkmate():
         return float('-inf') if board.turn == chess.WHITE else float('inf')
 
