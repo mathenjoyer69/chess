@@ -5,13 +5,15 @@ import pyautogui
 import tkinter as tk
 import random
 
+
 def on_close():
-    global autoplay_online_bool, analysis, autoplay_bool, custom_board_bool,bot_vs_bot
+    global autoplay_online_bool, analysis, autoplay_bool, custom_board_bool,bot_vs_bot,player_color
     autoplay_online_bool = autoplay_online_bool.get()
     analysis = analysis.get()
     autoplay_bool = autoplay_bool.get()
     custom_board_bool = custom_board_bool.get()
     bot_vs_bot = bot_vs_bot.get()
+    player_color = player_color.get()
     root.destroy()
 
 root = tk.Tk()
@@ -21,6 +23,12 @@ analysis = tk.BooleanVar(value=False)
 autoplay_bool = tk.BooleanVar(value=False)
 custom_board_bool = tk.BooleanVar(value=False)
 bot_vs_bot = tk.BooleanVar(value=False)
+player_color = tk.BooleanVar(value=False)
+
+player_color_label = tk.Label(root,text="check this to be the white pieces")
+player_color_label.pack()
+check_player_color = tk.Checkbutton(root,text="color",variable=player_color)
+check_player_color.pack(pady=5)
 
 autoplay_online_label = tk.Label(root, text="enable bot to move pieces on chess.com")
 autoplay_online_label.pack()
@@ -144,44 +152,44 @@ def evaluate_board(board):
 
     value = 0
     for square in chess.SQUARES:
-        piece = board.piece_at(square)
-        if piece:
-            if piece.color == chess.WHITE:
-                value += piece_values[piece.piece_type]
+        piece1 = board.piece_at(square)
+        if piece1:
+            if piece1.color == chess.WHITE:
+                value += piece_values[piece1.piece_type]
 
-                if piece.piece_type == chess.PAWN:
+                if piece1.piece_type == chess.PAWN:
                     value += pawn_table[square]
-                elif piece.piece_type == chess.KNIGHT:
+                elif piece1.piece_type == chess.KNIGHT:
                     value += knight_table[square]
-                elif piece.piece_type == chess.BISHOP:
+                elif piece1.piece_type == chess.BISHOP:
                     value += bishop_table[square]
-                elif piece.piece_type == chess.ROOK:
+                elif piece1.piece_type == chess.ROOK:
                     value += rook_table[square]
-                elif piece.piece_type == chess.QUEEN:
+                elif piece1.piece_type == chess.QUEEN:
                     value += queen_table[square]
-                elif piece.piece_type == chess.KING:
+                elif piece1.piece_type == chess.KING:
                     value += king_table[square]
 
-            if piece.color == chess.BLACK:
-                value -= piece_values[piece.piece_type]
+            if piece1.color == chess.BLACK:
+                value -= piece_values[piece1.piece_type]
 
-                if piece.piece_type == chess.PAWN:
+                if piece1.piece_type == chess.PAWN:
                     value -= pawn_table[chess.square_mirror(square)]
-                if piece.piece_type == chess.KNIGHT:
+                if piece1.piece_type == chess.KNIGHT:
                     value -= knight_table[chess.square_mirror(square)]
-                if piece.piece_type == chess.BISHOP:
+                if piece1.piece_type == chess.BISHOP:
                     value -= bishop_table[chess.square_mirror(square)]
-                if piece.piece_type == chess.ROOK:
+                if piece1.piece_type == chess.ROOK:
                     value -= rook_table[chess.square_mirror(square)]
-                if piece.piece_type == chess.QUEEN:
+                if piece1.piece_type == chess.QUEEN:
                     value -= queen_table[chess.square_mirror(square)]
-                if piece.piece_type == chess.KING:
+                if piece1.piece_type == chess.KING:
                     value -= king_table[chess.square_mirror(square)]
 
     #value += 10 * (len(list(board.legal_moves)) if board.turn == chess.WHITE else -len(list(board.legal_moves)))
 
     if board.is_checkmate():
-        return float('-inf') if board.turn == chess.WHITE else float('inf')
+        return float('inf') if board.turn == chess.WHITE else float('-inf')
 
     return value
 
@@ -196,6 +204,9 @@ def minimax(board, depth, alpha, beta, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, alpha, beta, False)
+            if board.is_checkmate():
+                board.pop()
+                return max_eval,best_move
             board.pop()
             if eval > max_eval:
                 max_eval = eval
@@ -209,6 +220,9 @@ def minimax(board, depth, alpha, beta, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, alpha, beta, True)
+            if board.is_checkmate():
+                board.pop()
+                return min_eval,best_move
             board.pop()
             if eval < min_eval:
                 min_eval = eval
@@ -218,17 +232,18 @@ def minimax(board, depth, alpha, beta, maximizing):
                 break
         return min_eval, best_move
 
-def get_best_move():
+def get_best_move(board):
     num_of_good_pieces = 0
     depth = 4
     for square in chess.SQUARES:
-        if board.piece_at(square) != chess.PAWN and board.piece_at(square) != None and board.piece_at(square) != chess.KING:
+        if board.piece_at(square) != chess.PAWN and board.piece_at(square) != None and board.piece_at(square) != "K":
+            print(board.piece_at(square))
             num_of_good_pieces += 1
-    if num_of_good_pieces < 4:
+    if num_of_good_pieces < 5:
         depth = 5
-    if num_of_good_pieces < 2:
+    if num_of_good_pieces < 4:
         depth = 6
-    print(depth)
+    print("depth",depth)
     _, best_move = minimax(board, depth, float('-inf'), float('inf'), board.turn)
     print(_)
     if best_move:
@@ -387,7 +402,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
         elif event.type == pygame.KEYDOWN and not autoplay_bool:
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
-                    best_move = get_best_move()
+                    best_move = get_best_move(board)
                     print(f"ai chose: {best_move}")
                 else:
                     print("its white's turn")
@@ -400,7 +415,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                 print("autoplay online on")
         if autoplay_bool:
             if counter % 2 != 0:
-                best_move = get_best_move()
+                best_move = get_best_move(board)
                 print(best_move)
                 if board.legal_moves:
                     counter += 1
@@ -456,7 +471,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
-                    best_move = get_best_move()
+                    best_move = get_best_move(board)
                     print(f"ai chose: {best_move}")
                     board.push(best_move)
                     sleep(1)
@@ -464,7 +479,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
                     counter += 1
                 else:
                     print("its white's turn")
-                    best_move = get_best_move()
+                    best_move = get_best_move(board)
                     board.push(best_move)
                     sleep(1)
                     autoplay_online(best_move, analysis)
@@ -472,7 +487,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
         if autoplay_bool:
             if counter % 2 != 0:
                 counter += 1
-                best_move = get_best_move()
+                best_move = get_best_move(board)
                 print(best_move)
                 sleep(1)
                 board.push(best_move)
@@ -512,7 +527,7 @@ while running and bot_vs_bot:
                 play = not play
 
     if play:
-        best_move = get_best_move()
+        best_move = get_best_move(board)
         move_str = str(best_move)
         move_1,move_2 = move_str[:2],move_str[2:]
         move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
