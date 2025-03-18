@@ -147,23 +147,38 @@ def evaluate_board(board):
         piece = board.piece_at(square)
         if piece:
             if piece.color == chess.WHITE:
-                sign = 1
-            else:
-                sign = -1
-            value += sign * piece_values[piece.piece_type]
+                value += piece_values[piece.piece_type]
 
-            if piece.piece_type == chess.PAWN:
-                value += sign * pawn_table[square]
-            elif piece.piece_type == chess.KNIGHT:
-                value += sign * knight_table[square]
-            elif piece.piece_type == chess.BISHOP:
-                value += sign * bishop_table[square]
-            elif piece.piece_type == chess.ROOK:
-                value += sign * rook_table[square]
-            elif piece.piece_type == chess.QUEEN:
-                value += sign * queen_table[square]
-            elif piece.piece_type == chess.KING:
-                value += sign * king_table[square]
+                if piece.piece_type == chess.PAWN:
+                    value += pawn_table[square]
+                elif piece.piece_type == chess.KNIGHT:
+                    value += knight_table[square]
+                elif piece.piece_type == chess.BISHOP:
+                    value += bishop_table[square]
+                elif piece.piece_type == chess.ROOK:
+                    value += rook_table[square]
+                elif piece.piece_type == chess.QUEEN:
+                    value += queen_table[square]
+                elif piece.piece_type == chess.KING:
+                    value += king_table[square]
+
+            if piece.color == chess.BLACK:
+                value -= piece_values[piece.piece_type]
+
+                if piece.piece_type == chess.PAWN:
+                    value -= pawn_table[chess.square_mirror(square)]
+                if piece.piece_type == chess.KNIGHT:
+                    value -= knight_table[chess.square_mirror(square)]
+                if piece.piece_type == chess.BISHOP:
+                    value -= bishop_table[chess.square_mirror(square)]
+                if piece.piece_type == chess.ROOK:
+                    value -= rook_table[chess.square_mirror(square)]
+                if piece.piece_type == chess.QUEEN:
+                    value -= queen_table[chess.square_mirror(square)]
+                if piece.piece_type == chess.KING:
+                    value -= king_table[chess.square_mirror(square)]
+
+    #value += 10 * (len(list(board.legal_moves)) if board.turn == chess.WHITE else -len(list(board.legal_moves)))
 
     if board.is_checkmate():
         return float('-inf') if board.turn == chess.WHITE else float('inf')
@@ -204,7 +219,18 @@ def minimax(board, depth, alpha, beta, maximizing):
         return min_eval, best_move
 
 def get_best_move():
-    _, best_move = minimax(board, 3, float('-inf'), float('inf'), board.turn)
+    num_of_good_pieces = 0
+    depth = 4
+    for square in chess.SQUARES:
+        if board.piece_at(square) != chess.PAWN and board.piece_at(square) != None and board.piece_at(square) != chess.KING:
+            num_of_good_pieces += 1
+    if num_of_good_pieces < 4:
+        depth = 5
+    if num_of_good_pieces < 2:
+        depth = 6
+    print(depth)
+    _, best_move = minimax(board, depth, float('-inf'), float('inf'), board.turn)
+    print(_)
     if best_move:
         return best_move
     else:
@@ -484,14 +510,22 @@ while running and bot_vs_bot:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 play = not play
+
     if play:
         best_move = get_best_move()
         move_str = str(best_move)
         move_1,move_2 = move_str[:2],move_str[2:]
         move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
         moves.append([move_1_n,move_2_n,move_str])
-        print(best_move)
-        board.push(best_move)
+        if not autoplay_bool:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_d:
+                        board.push(best_move)
+                        print(best_move)
+        else:
+            board.push(best_move)
+            print(best_move)
         sleep(0.1)
         moves_played.append(best_move)
         if autoplay_online_bool:
