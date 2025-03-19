@@ -417,6 +417,7 @@ while running and custom_board_bool:
                     custom_board_bool = False
             else:
                 print("select a square first😡")
+moves1 = []
 while running and not autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     keys = pygame.key.get_pressed()
     draw_board(flipped)
@@ -455,6 +456,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                     move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
+                    moves1.append(move)
                     moves_played.append(move)
                     print(move)
                     flipped = not flipped
@@ -484,6 +486,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                 if board.legal_moves:
                     counter += 1
                     board.push(best_move)
+                    moves1.append(best_move)
                     moves_played.append(best_move)
                 flipped = not flipped
 if running and autoplay_online_bool:
@@ -594,7 +597,10 @@ while running and bot_vs_bot:
         best_move = get_best_move(board)
         move_str = str(best_move)
         move_1,move_2 = move_str[:2],move_str[2:]
-        move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
+        if square_to_number[move_1] and square_to_number[move_2]:
+            move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
+        else:
+            move_1_n, move_2_n = "udf","udf"
         moves.append([move_1_n,move_2_n,move_str])
         if not autoplay_bool:
             for event in pygame.event.get():
