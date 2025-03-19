@@ -82,17 +82,17 @@ pygame.display.set_caption("chess")
 
 
 def evaluate_board(board):
-    piece_values = {chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330,chess.ROOK: 500, chess.QUEEN: 900, chess.KING: 10000}
+    piece_values = {chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330,chess.ROOK: 500, chess.QUEEN: 900, chess.KING: 20000}
 
     pawn_table = [
-        0,  5,  10, 15,  15, 10, 5,  0,
+        30,  30,  30, 30,  30, 30, 30,  30,
         0,  10, 20, 25,  25, 20, 10, 0,
         0,  5,  10, 20,  20, 10, 5,  0,
-        5,  5,  10, 15,  15, 10, 5,  5,
-        5,  0,  5,  10,  10, 5,  0,  5,
-        0,  0,  0,  -5,  -5, 0,  0,  0,
+        5,  5,  10, 20,  20, 10, 5,  5,
+        5,  0,  5,  20,  20, 5,  0,  5,
+        -7,  10,  0,  -5,  -5, 0,  10,  -7,
         0,  0,  0,  5,   5,  0,  0,  0,
-        0,  0,  0,  0,   0,  0,  0,  0,
+        30,  30,  30,  30,  30,  30,  30,  30,
     ]
 
     knight_table = [
@@ -108,7 +108,7 @@ def evaluate_board(board):
 
     bishop_table = [
         -20, -10, -10, -10, -10, -10, -10, -20,
-        -10,  5,   0,   0,   0,   0,   5,  -10,
+        -10,  15,   0,   0,   0,   0,   15,  -10,
         -10,  0,   5,   5,   5,   5,   0,  -10,
         -10,  0,   5,  10,  10,   5,   0,  -10,
         -10,  0,   5,  10,  10,   5,   0,  -10,
@@ -118,14 +118,14 @@ def evaluate_board(board):
     ]
 
     rook_table = [
-        0,  5,  10, 10, 10, 10,  5,  0,
+        0,  -20,  10, 10, 10, 10,  -20,  0,
         5,  5,  10, 10, 10, 10,  5,  5,
         10, 10, 20, 20, 20, 20, 10, 10,
         10, 10, 20, 20, 20, 20, 10, 10,
         10, 10, 20, 20, 20, 20, 10, 10,
         5,  5,  10, 10, 10, 10,  5,  5,
-        0,  5,  10, 10, 10, 10,  5,  0,
-        0,  0,  5,  5,  5,  5,   0,  0,
+       -10, 5,  10, 10, 10, 10,  5, -10,
+        0,  -5,  5,  5,  5,  5,   -5,  0,
     ]
 
     queen_table = [
@@ -174,7 +174,7 @@ def evaluate_board(board):
                 value -= piece_values[piece1.piece_type]
 
                 if piece1.piece_type == chess.PAWN:
-                    value -= pawn_table[chess.square_mirror(square)]
+                    value += pawn_table[chess.square_mirror(square)]
                 if piece1.piece_type == chess.KNIGHT:
                     value -= knight_table[chess.square_mirror(square)]
                 if piece1.piece_type == chess.BISHOP:
