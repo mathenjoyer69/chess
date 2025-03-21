@@ -371,6 +371,15 @@ def autoplay_online(move1,analysis):
     sleep(0.5)
     pyautogui.dragTo(last_m_coordinates,button="left")
 
+def uci_to_pgn(uci_moves):
+    pgn_moves = []
+    for i, move in enumerate(uci_moves, start=1):
+        if i % 2 == 1:
+            pgn_moves.append(f"{(i + 1) // 2}: {move.uci()}")
+        else:
+            pgn_moves[-1] += f" {move.uci()}"
+    return " ".join(pgn_moves)
+
 running = True
 selected_square = None
 flipped = player_color
@@ -410,6 +419,7 @@ while running and custom_board_bool:
                     custom_board_bool = False
             else:
                 print("select a square first😡")
+
 moves1 = []
 while running and not autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     keys = pygame.key.get_pressed()
@@ -492,7 +502,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                     moves1.append(best_move)
                     moves_played.append(best_move)
                 flipped = not flipped
-print(moves1)
+print(uci_to_pgn(moves1))
 while running and autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     if moves_played:
         for i in moves_played:
@@ -617,5 +627,5 @@ while running and bot_vs_bot:
         moves_played.append(best_move)
         if autoplay_online_bool:
             autoplay_online(best_move,analysis)
-print(moves)
+print(uci_to_pgn(moves))
 pygame.quit()
