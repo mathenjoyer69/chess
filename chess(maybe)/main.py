@@ -268,9 +268,6 @@ def minimax(board, depth, alpha, beta, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, alpha, beta, False)
-            if board.is_checkmate():
-                board.pop()
-                return max_eval,best_move
             board.pop()
             if eval > max_eval:
                 max_eval = eval
@@ -284,9 +281,6 @@ def minimax(board, depth, alpha, beta, maximizing):
         for move in board.legal_moves:
             board.push(move)
             eval, _ = minimax(board, depth - 1, alpha, beta, True)
-            if board.is_checkmate():
-                board.pop()
-                return min_eval,best_move
             board.pop()
             if eval < min_eval:
                 min_eval = eval
@@ -309,7 +303,6 @@ def get_best_move(board):
         depth = 6
     print("depth",depth)
     _, best_move = minimax(board, depth, float('-inf'), float('inf'), board.turn)
-    print(_)
     if best_move:
         return best_move
     else:
@@ -380,7 +373,7 @@ def autoplay_online(move1,analysis):
 
 running = True
 selected_square = None
-flipped = True
+flipped = player_color
 
 counter = 0
 moves_played = []
@@ -423,6 +416,10 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
     draw_board(flipped)
     draw_pieces(flipped)
     pygame.display.flip()
+    if not player_color:
+        ai_move = get_best_move(board)
+        board.push(ai_move)
+        player_color = not player_color
 
     if not board.legal_moves:
         running = False
@@ -469,9 +466,12 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
             if event.key == pygame.K_SPACE:
                 if counter % 2 != 0:
                     best_move = get_best_move(board)
+                    board.push(best_move)
                     print(f"ai chose: {best_move}")
                 else:
                     print("its white's turn")
+                    best_move = get_best_move(board)
+                    board.push(best_move)
             elif event.key == pygame.K_d:
                 autoplay_bool = not autoplay_bool
                 print("autoplay on")
@@ -489,8 +489,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                     moves1.append(best_move)
                     moves_played.append(best_move)
                 flipped = not flipped
-if running and autoplay_online_bool:
-    flipped = True
+
 while running and autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     if moves_played:
         for i in moves_played:
@@ -506,9 +505,9 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
             print("draw")
             break
         if counter % 2 == 0:
-            print("black won")
-        else:
             print("white won")
+        else:
+            print("black won")
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -529,7 +528,7 @@ while running and autoplay_online_bool and not custom_board_bool and not bot_vs_
                     move = chess.Move(selected_square, square)
                 if move in board.legal_moves:
                     board.push(move)
-                    autoplay_online(move,analysis)
+                    #autoplay_online(move,analysis)
                     counter += 1
                 else:
                     print("illegal move")
@@ -596,8 +595,8 @@ while running and bot_vs_bot:
     if play:
         best_move = get_best_move(board)
         move_str = str(best_move)
-        move_1,move_2 = move_str[:2],move_str[2:]
-        if square_to_number[move_1] and square_to_number[move_2]:
+        move_1,move_2 = move_str[:2],move_str[2:3]
+        if len(move_1) == 2 and len(move_2) == 2:
             move_1_n,move_2_n = square_to_number[move_1],square_to_number[move_2]
         else:
             move_1_n, move_2_n = "udf","udf"
@@ -610,7 +609,7 @@ while running and bot_vs_bot:
                         print(best_move)
         else:
             board.push(best_move)
-            print(best_move)
+            print(best_move,best_move)
         sleep(0.1)
         moves_played.append(best_move)
         if autoplay_online_bool:
