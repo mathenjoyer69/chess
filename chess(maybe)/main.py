@@ -416,10 +416,12 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
     draw_board(flipped)
     draw_pieces(flipped)
     pygame.display.flip()
-    if not player_color:
+    if not player_color and autoplay_bool:
         ai_move = get_best_move(board)
         board.push(ai_move)
         player_color = not player_color
+        moves1.append(ai_move)
+
 
     if not board.legal_moves:
         running = False
@@ -467,6 +469,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                 if counter % 2 != 0:
                     best_move = get_best_move(board)
                     board.push(best_move)
+                    moves1.append(best_move)
                     print(f"ai chose: {best_move}")
                 else:
                     print("its white's turn")
@@ -489,7 +492,7 @@ while running and not autoplay_online_bool and not custom_board_bool and not bot
                     moves1.append(best_move)
                     moves_played.append(best_move)
                 flipped = not flipped
-
+print(moves1)
 while running and autoplay_online_bool and not custom_board_bool and not bot_vs_bot:
     if moves_played:
         for i in moves_played:
